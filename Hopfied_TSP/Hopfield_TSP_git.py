@@ -52,6 +52,9 @@ def calc_U(U, du, step):
     return U + du * step
 # 更新神经网络的输出电压V
 def calc_V(U, U0):
+    print(U)
+    print(U / U0)
+    print(np.tanh(U / U0))
     return 1 / 2 * (1 + np.tanh(U / U0))
 # 计算当前网络的能量
 def calc_energy(V, distance):
@@ -105,7 +108,7 @@ if __name__ == '__main__':
     D = N / 2
     U0 = 0.0009  # 初始电压
     step = 0.0001  # 步长
-    num_iter = 10000  # 迭代次数
+    num_iter = 10  # 迭代次数
     # 初始化神经网络的输入状态（电路的输入电压U）
     U = 1 / 2 * U0 * np.log(N - 1) + (2 * (np.random.random((N, N))) - 1)
     # 初始化神经网络的输出状态（电路的输出电压V）
@@ -118,6 +121,7 @@ if __name__ == '__main__':
     for n in range(num_iter):
         # 利用动态方程计算du
         du = calc_du(V, distance)
+        print(du)
         # 由一阶欧拉法更新下一个时间的输入状态（电路的输入电压U）
         U = calc_U(U, du, step)
         # 由sigmoid函数更新下一个时间的输出状态（电路的输出电压V）
@@ -126,6 +130,7 @@ if __name__ == '__main__':
         energys[n] = calc_energy(V, distance)
         # 检查路径的合法性
         route, newV = check_path(V)
+        '''
         if len(np.unique(route)) == N:
             route.append(route[0])
             dis = calc_distance(route)
@@ -140,3 +145,4 @@ if __name__ == '__main__':
         draw_H_and_E(citys, H_path, energys)
     else:
         print('没有找到最优解')
+    '''

@@ -7,4 +7,4 @@ for i in range(3):
         a[i, j] = n
         n += 1
 print(a)
-print(a[:, 1])
+print(np.sum(a, axis=0))

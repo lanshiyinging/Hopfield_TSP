@@ -13,7 +13,7 @@ class Hopfied_TSP(object):
     def __init__(self, root, iteration, width=560, height=330):
         self.root = root
         self.step = 0.5
-        self.num = 8
+        self.num = 10
         self.A = 1.5
         self.D = 1.0
         self.U0 = 0.02
@@ -22,7 +22,7 @@ class Hopfied_TSP(object):
         self.height = height
         self.dis = np.zeros((self.num, self.num))
         #self.citys = np.zeros((self.num, 2))
-        self.citys = np.array([[2, 6], [2, 4], [1, 3], [4, 6], [5, 5], [4, 4], [6, 4], [3, 2]])
+        self.citys = np.array([[0.4000, 0.4439], [0.2439, 0.1463], [0.1707, 0.2293], [0.2293, 0.7610], [0.5171, 0.9414], [0.8732, 0.6536], [0.6878, 0.5219], [0.8488, 0.3609], [0.6683, 0.2536], [0.6195, 0.2634]])
 
 
         self.W = np.zeros((self.num, self.num, self.num, self.num))
@@ -56,6 +56,7 @@ class Hopfied_TSP(object):
             line = file.readline()
             n += 1
         '''
+
         minX, minY = self.citys[0, 0], self.citys[0, 1]
         maxX, maxY = minX, minY
         for city in self.citys:
@@ -78,7 +79,7 @@ class Hopfied_TSP(object):
         for city in self.citys:
             x = (city[0]-minX) * normX + xoffset
             y = self.height - (city[1]-minY) * normY + yoffset
-            self.nodes.append((x,y))
+            self.nodes.append((x, y))
             node = self.canvas.create_oval(x-r, y-r, x+r, y+r, fill="#ff0000", outline="#000000", tag="node")
             self.canvas_nodes.append(node)
 
@@ -89,7 +90,7 @@ class Hopfied_TSP(object):
                 city2 = self.citys[j]
                 d = math.sqrt(pow(city1[0]-city2[0], 2)+pow(city1[1]-city2[1], 2))
                 self.dis[i, j] = d
-        print(self.dis)
+        #print(self.dis)
 
     def title(self, text):
         self.root.title(text)
@@ -105,9 +106,25 @@ class Hopfied_TSP(object):
             for i in range(self.num):
                 for y in range(self.num):
                     for j in range(self.num):
-                        self.W[x, i, y, j] = -self.A*(self.delta(x, y) + self.delta(i, j))-self.D*self.dis[x, y]*self.delta(j, i-1)
+                        self.W[x, i, y, j] = -self.A*(self.delta(x, y) + self.delta(i, j))-self.D*self.dis[x, y]*self.delta(j, i+1)
 
     def cal_du(self):
+        '''
+        a = np.sum(self.V, axis=0)-1
+        b = np.sum(self.V, axis=1)-1
+        t1 = np.zeros((self.num, self.num))
+        t2 = np.zeros((self.num, self.num))
+        for i in range(self.num):
+            for j in range(self.num):
+                t1[i, j] = b[i]
+                t2[i, j] = a[j]
+        c_1 = self.V[:, 1:self.num]
+        c_0 = np.zeros((self.num, 1))
+        c_0[:, 0] = self.V[:, 0]
+        c = np.concatenate((c_1, c_0), axis=1)
+        c = np.dot(self.dis, c)
+        self.du = -self.A * (t1 + t2) - self.D * c
+        '''
         for x in range(self.num):
             for i in range(self.num):
                 self.du[x, i] = np.sum(np.sum(np.multiply(self.W[x, i, :, :], self.V)))
@@ -129,6 +146,11 @@ class Hopfied_TSP(object):
         self.U += self.du*self.step
 
     def updaateV(self):
+        '''
+        print(self.U)
+        print(self.U/self.U0)
+        print(np.tanh(self.U / self.U0))
+        '''
         self.V = 1 / 2*(1 + np.tanh(self.U / self.U0))
 
     def cal_E(self):
@@ -185,13 +207,9 @@ class Hopfied_TSP(object):
         self.updaateV()
         for i in range(1, self.iteration):
             self.cal_du()
-            print(self.du)
             self.updateU()
-            print(self.U)
             self.updaateV()
-            print(self.V)
             e = self.cal_E()
-            print(e)
             E.append(e)
             flag, path = self.check_path()
             if flag:
@@ -216,7 +234,7 @@ class Hopfied_TSP(object):
 
 
 if __name__ == '__main__':
-    h_tsp = Hopfied_TSP(Tkinter.Tk(), 2)
+    h_tsp = Hopfied_TSP(Tkinter.Tk(), 10000)
     h_tsp.mainloop()
 
 
